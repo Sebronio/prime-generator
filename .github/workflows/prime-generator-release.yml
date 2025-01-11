@@ -2,7 +2,7 @@ name: Deploy JAR to GitHub Packages on Release
 
 on:
   release:
-    types: [created]  # Trigger when a new release is created
+    types: [created]  # Trigger when a new release is create
 
 jobs:
   deploy:
