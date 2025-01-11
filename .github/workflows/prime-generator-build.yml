@@ -29,8 +29,47 @@ jobs:
       - name: Set Version (using commit hash)
         id: set_version
         run: |
-          VERSION=$(git rev-parse --short HEAD)
+          VERSION="1.0-SNAPSHOT-${{ github.sha }}"
           echo "Version is $VERSION"
           echo "VERSION=$VERSION" >> $GITHUB_ENV  # Sets the version as an environment variable
 
-      
+      # Upload the JAR and other Assets (MD5, SHA1)
+      - name: Upload JAR to GitHub Packages
+        run: |
+          JAR_PATH="target/prime-generator-1.0-SNAPSHOT.jar"
+          POM_PATH="pom.xml"
+          
+          # Use the dynamically set version from the previous step
+          VERSION=${{ env.VERSION }}
+          echo "Using version: $VERSION"
+
+          # Deploy JAR file to GitHub Packages
+          mvn deploy:deploy-file \
+            -Dfile=${JAR_PATH} \
+            -DpomFile=${POM_PATH} \
+            -DrepositoryId=github \
+            -Durl=https://maven.pkg.github.com/Sebronio/prime-generator \
+            -DgroupId=uk.ac.open.primegenerator \
+            -DartifactId=prime-generator \
+            -Dversion=${VERSION} \
+            -Dpackaging=jar
+
+          # Deploy MD5 checksum
+          mvn deploy:deploy-file \
+            -Dfile=${JAR_PATH}.md5 \
+            -DrepositoryId=github \
+            -Durl=https://maven.pkg.github.com/Sebronio/prime-generator \
+            -DgroupId=uk.ac.open.primegenerator \
+            -DartifactId=prime-generator \
+            -Dversion=${VERSION} \
+            -Dpackaging=md5
+
+          # Deploy SHA1 checksum
+          mvn deploy:deploy-file \
+            -Dfile=${JAR_PATH}.sha1 \
+            -DrepositoryId=github \
+            -Durl=https://maven.pkg.github.com/Sebronio/prime-generator \
+            -DgroupId=uk.ac.open.primegenerator \
+            -DartifactId=prime-generator \
+            -Dversion=${VERSION} \
+            -Dpackaging=sha1
