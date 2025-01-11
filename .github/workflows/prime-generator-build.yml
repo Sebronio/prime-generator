@@ -26,9 +26,19 @@ jobs:
       # Upload the JAR and other Assets (MD5, SHA1)
       - name: Upload JAR to GitHub Packages
         run: |
+          # Set the paths for JAR, POM, and version
           JAR_PATH="target/prime-generator-1.0-SNAPSHOT.jar"
           POM_PATH="pom.xml"
+          
+          # Make sure the version is fetched from GitHub release tag
           VERSION="${{ github.event.release.tag_name }}"
+          echo "Using version: ${VERSION}"
+
+          # Check if the version is valid
+          if [ -z "$VERSION" ]; then
+            echo "Version is not set. Exiting."
+            exit 1
+          fi
 
           # Deploy JAR file to GitHub Packages
           mvn deploy:deploy-file \
