@@ -1,0 +1,74 @@
+name: Deploy JAR to GitHub Packages on Release
+
+on:
+  release:
+    types: [created]  # Trigger when a new release is created
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository code
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Set up Java (JDK 11)
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      # Build the project with Maven (compile, test, and package the JAR)
+      - name: Build with Maven
+        run: mvn clean package --batch-mode --update-snapshots
+
+      # Set the version based on the release tag
+      - name: Set Version (using release tag)
+        id: set_version
+        run: |
+          VERSION=${{ github.event.release.tag_name }}
+          echo "Version is $VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV  # Sets the version as an environment variable
+
+      # Upload the JAR and other Assets (MD5, SHA1) to GitHub Packages
+      - name: Upload JAR and Assets to GitHub Packages
+        run: |
+          JAR_PATH="target/prime-generator-1.0-SNAPSHOT.jar"
+          POM_PATH="pom.xml"
+          
+          # Use the dynamically set version from the previous step
+          VERSION=${{ env.VERSION }}
+          echo "Using version: $VERSION"
+
+          # Deploy the JAR file to GitHub Packages
+          mvn deploy:deploy-file \
+            -Dfile=${JAR_PATH} \
+            -DpomFile=${POM_PATH} \
+            -DrepositoryId=github \
+            -Durl=https://maven.pkg.github.com/Sebronio/prime-generator \
+            -DgroupId=uk.ac.open.primegenerator \
+            -DartifactId=prime-generator \
+            -Dversion=${VERSION} \
+            -Dpackaging=jar
+
+          # Deploy the MD5 checksum file
+          mvn deploy:deploy-file \
+            -Dfile=${JAR_PATH}.md5 \
+            -DrepositoryId=github \
+            -Durl=https://maven.pkg.github.com/Sebronio/prime-generator \
+            -DgroupId=uk.ac.open.primegenerator \
+            -DartifactId=prime-generator \
+            -Dversion=${VERSION} \
+            -Dpackaging=md5
+
+          # Deploy the SHA1 checksum file
+          mvn deploy:deploy-file \
+            -Dfile=${JAR_PATH}.sha1 \
+            -DrepositoryId=github \
+            -Durl=https://maven.pkg.github.com/Sebronio/prime-generator \
+            -DgroupId=uk.ac.open.primegenerator \
+            -DartifactId=prime-generator \
+            -Dversion=${VERSION} \
+            -Dpackaging=sha1
