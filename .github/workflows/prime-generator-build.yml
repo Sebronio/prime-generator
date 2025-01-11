@@ -48,7 +48,7 @@ jobs:
             -Dfile=${JAR_PATH} \
             -DpomFile=${POM_PATH} \
             -DrepositoryId=github \
-            -Durl=https://maven.pkg.github.com/${{ github.repository_owner }}/prime-generator \
+            -Durl=https://maven.pkg.github.com/Sebronio/prime-generator \
             -DgroupId=uk.ac.open.primegenerator \
             -DartifactId=prime-generator \
             -Dversion=${VERSION} \
@@ -58,7 +58,7 @@ jobs:
           mvn deploy:deploy-file \
             -Dfile=${JAR_PATH}.md5 \
             -DrepositoryId=github \
-            -Durl=https://maven.pkg.github.com/${{ github.repository_owner }}/prime-generator \
+            -Durl=https://maven.pkg.github.com/Sebronio/prime-generator \
             -DgroupId=uk.ac.open.primegenerator \
             -DartifactId=prime-generator \
             -Dversion=${VERSION} \
@@ -68,7 +68,7 @@ jobs:
           mvn deploy:deploy-file \
             -Dfile=${JAR_PATH}.sha1 \
             -DrepositoryId=github \
-            -Durl=https://maven.pkg.github.com/${{ github.repository_owner }}/prime-generator \
+            -Durl=https://maven.pkg.github.com/Sebronio/prime-generator \
             -DgroupId=uk.ac.open.primegenerator \
             -DartifactId=prime-generator \
             -Dversion=${VERSION} \
