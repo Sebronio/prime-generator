@@ -52,6 +52,8 @@ jobs:
             -DartifactId=prime-generator \
             -Dversion=${VERSION} \
             -Dpackaging=jar
+            -Dusername=${{ github.actor }} \
+            -Dpassword=${{ secrets.GITHUB_TOKEN }}
 
           # Deploy the MD5 checksum file
           mvn deploy:deploy-file \
@@ -63,6 +65,7 @@ jobs:
             -Dversion=${VERSION} \
             -Dpackaging=md5
 
+
           # Deploy the SHA1 checksum file
           mvn deploy:deploy-file \
             -Dfile=${JAR_PATH}.sha1 \
@@ -72,3 +75,5 @@ jobs:
             -DartifactId=prime-generator \
             -Dversion=${VERSION} \
             -Dpackaging=sha1
+            -Dusername=${{ github.actor }} \
+            -Dpassword=${{ secrets.GITHUB_TOKEN }}
