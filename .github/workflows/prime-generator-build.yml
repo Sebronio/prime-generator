@@ -32,11 +32,6 @@ jobs:
           VERSION=$(git rev-parse --short HEAD)
           echo "Version is $VERSION"
           echo "VERSION=$VERSION" >> $GITHUB_ENV  # Sets the version as an environment variable
-                
-      - name: Set up authentication for GitHub Packages
-        run: |
-          echo "//maven.pkg.github.com/:username= Sebronio" >> ~/.m2/settings.xml
-          echo "//maven.pkg.github.com/:password=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" >> ~/.m2/settings.xml
 
       # Upload the JAR and other Assets (MD5, SHA1)
       - name: Upload JAR to GitHub Packages
