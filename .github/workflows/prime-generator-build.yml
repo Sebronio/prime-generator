@@ -1,10 +1,12 @@
-name: Build Pipeline for the Prime Generator Project
+name: Build and Deploy to GitHub Packages
 
-on: [push]
+on:
+  push:
+    branches:
+      - main  # or any branch you're working with
 
 jobs:
   build:
-    
     runs-on: ubuntu-latest
 
     steps:
@@ -23,22 +25,23 @@ jobs:
       - name: Build with Maven
         run: mvn clean package --batch-mode --update-snapshots
 
+      # Set the version based on the commit hash
+      - name: Set Version (using commit hash)
+        id: set_version
+        run: |
+          VERSION=$(git rev-parse --short HEAD)
+          echo "Version is $VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV  # Sets the version as an environment variable
+
       # Upload the JAR and other Assets (MD5, SHA1)
       - name: Upload JAR to GitHub Packages
         run: |
-          # Set the paths for JAR, POM, and version
           JAR_PATH="target/prime-generator-1.0-SNAPSHOT.jar"
           POM_PATH="pom.xml"
           
-          # Make sure the version is fetched from GitHub release tag
-          VERSION="${{ github.event.release.tag_name }}"
-          echo "Using version: ${VERSION}"
-
-          # Check if the version is valid
-          if [ -z "$VERSION" ]; then
-            echo "Version is not set. Exiting."
-            exit 1
-          fi
+          # Use the dynamically set version from the previous step
+          VERSION=${{ env.VERSION }}
+          echo "Using version: $VERSION"
 
           # Deploy JAR file to GitHub Packages
           mvn deploy:deploy-file \
