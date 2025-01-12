@@ -1,4 +1,4 @@
-name: Deploy JAR to GitHub Packages on Release
+name: Deploy JAR to GitHub Packages on Release Test
 
 on:
   release:
