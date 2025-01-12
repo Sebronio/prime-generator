@@ -1,4 +1,4 @@
-name: Build Pipeline for the Prime Generator Project
+name: Build Pipeline for the Prime Generator Project Test
 
 on:
   push:
@@ -18,7 +18,7 @@ jobs:
         run: sudo apt-get install maven -y
       - name: Build with Maven
         run: mvn --batch-mode --update-snapshots package 
-        
+
       # Upload the JAR to GitHub Packages
       - name: Deploy to GitHub Packages
         run: |
