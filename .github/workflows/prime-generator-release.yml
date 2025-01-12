@@ -62,6 +62,7 @@ jobs:
             -DartifactId=prime-generator \
             -Dversion=${VERSION} \
             -Dpackaging=jar
+            -Dtoken=${{ secrets.GITHUB_TOKEN }}
           
           # Deploy the MD5 checksum file
           mvn deploy:deploy-file \
@@ -72,6 +73,7 @@ jobs:
             -DartifactId=prime-generator \
             -Dversion=${VERSION} \
             -Dpackaging=md5
+            -Dtoken=${{ secrets.GITHUB_TOKEN }}
           
           # Deploy the SHA1 checksum file
           mvn deploy:deploy-file \
@@ -82,6 +84,7 @@ jobs:
             -DartifactId=prime-generator \
             -Dversion=${VERSION} \
             -Dpackaging=sha1
+            -Dtoken=${{ secrets.GITHUB_TOKEN }}
 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
