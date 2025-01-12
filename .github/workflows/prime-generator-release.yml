@@ -1,34 +1,38 @@
-name: Build and Deploy to GitHub Packages
+name: Deploy JAR to GitHub Packages on Release
 
 on:
   release:
-    types: [created]  # Trigger on release creation
+    types: [created]  # Trigger when a new release is created
+
+permissions:
+  contents: write
+  packages: write  # Ensure package publishing permissions
+  id-token: write
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
+      # Debug the environment variables
+      - name: Debug Environment Variables
+        run: |
+          echo "GITHUB_ACTOR=${{ github.actor }}"
+          echo "GITHUB_TOKEN is set? ${{ secrets.GITHUB_TOKEN != '' }}"
+          echo "VERSION=${{ env.VERSION }}"
+
       # Checkout the repository code
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # Debug the GitHub event payload to check if version is set correctly
-      - name: Debug GitHub Event
-        run: echo "${{ toJson(github.event) }}"
-
-      # Set up JDK 11
+      # Set up Java (JDK 11)
       - name: Set up JDK 11
         uses: actions/setup-java@v3
         with:
           java-version: '11'
           distribution: 'temurin'
 
-      # Setup Maven
-      - name: Setup Maven
-        run: sudo apt-get install maven -y
-
-      # Build with Maven (compile, test, package)
+      # Build the project with Maven (compile, test, and package the JAR)
       - name: Build with Maven
         run: mvn --batch-mode --update-snapshots package
 
@@ -38,23 +42,46 @@ jobs:
         run: |
           VERSION=${{ github.event.release.tag_name }}
           echo "Version is $VERSION"
-          echo "VERSION=$VERSION" >> $GITHUB_ENV  # Sets the version as an environment variable
+          echo "VERSION=$VERSION" >> $GITHUB_ENV  # Export as environment variable
 
-      # Debug the environment variable
-      - name: Check Version
-        run: echo "VERSION=${{ env.VERSION }}"
-
-      # Upload the JAR to GitHub Packages
+      # Deploy the JAR to GitHub Packages
       - name: Deploy to GitHub Packages
         run: |
+          JAR_PATH="target/prime-generator-1.0-SNAPSHOT.jar"
+          POM_PATH="pom.xml"
+          VERSION=${{ env.VERSION }}
+          echo "Deploying version: $VERSION"
+          
+          # Deploy the JAR file to GitHub Packages
           mvn deploy:deploy-file \
-            -Dfile=target/prime-generator-1.0-SNAPSHOT.jar \
-            -DpomFile=pom.xml \
+            -Dfile=${JAR_PATH} \
+            -DpomFile=${POM_PATH} \
             -DrepositoryId=github \
-            -Durl=https://maven.pkg.github.com/Sebronio/prime-generator \
+            -Durl=https://maven.pkg.github.com/${{ github.actor }}/prime-generator \
             -DgroupId=uk.ac.open.primegenerator \
             -DartifactId=prime-generator \
-            -Dversion=${{ env.VERSION }} \
+            -Dversion=${VERSION} \
             -Dpackaging=jar
+          
+          # Deploy the MD5 checksum file
+          mvn deploy:deploy-file \
+            -Dfile=${JAR_PATH}.md5 \
+            -DrepositoryId=github \
+            -Durl=https://maven.pkg.github.com/${{ github.actor }}/prime-generator \
+            -DgroupId=uk.ac.open.primegenerator \
+            -DartifactId=prime-generator \
+            -Dversion=${VERSION} \
+            -Dpackaging=md5
+          
+          # Deploy the SHA1 checksum file
+          mvn deploy:deploy-file \
+            -Dfile=${JAR_PATH}.sha1 \
+            -DrepositoryId=github \
+            -Durl=https://maven.pkg.github.com/${{ github.actor }}/prime-generator \
+            -DgroupId=uk.ac.open.primegenerator \
+            -DartifactId=prime-generator \
+            -Dversion=${VERSION} \
+            -Dpackaging=sha1
+
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
