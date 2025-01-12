@@ -37,9 +37,5 @@ jobs:
           echo "Version is $VERSION"
           echo "VERSION=$VERSION" >> $GITHUB_ENV  # Export as environment variable
 
-      # Deploy the JAR and other Assets to GitHub Packages
-      - name: Upload JAR to GitHub Packages
-        run: |
-          JAR_PATH="target/prime-generator-1.0-SNAPSHOT.jar"
-          POM_PATH="pom.xml"
+
           
